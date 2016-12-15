@@ -28,7 +28,7 @@ const eventDefaultProps = {}
 
 each(events, event => {
   eventPropTypes[event] = PropTypes.func,
-  eventDefaultProps[`${event}Handler`] = noop
+      eventDefaultProps[`${event}Handler`] = noop
 })
 
 export default class Timeline extends Component {
@@ -55,18 +55,21 @@ export default class Timeline extends Component {
 
   shouldComponentUpdate(nextProps) {
     const {
-      items,
-      options,
-      customTimes
-    } = this.props
+        items,
+        groups,
+        options,
+        customTimes
+        } = this.props
 
     const itemsChange = items !== nextProps.items
+    const groupsChange = groups !== nextProps.groups
     const optionsChange = options !== nextProps.options
     const customTimesChange = customTimes !== nextProps.customTimes
 
     return itemsChange ||
-      optionsChange ||
-      customTimesChange
+        groupsChange ||
+        optionsChange ||
+        customTimesChange
   }
 
   // create timeline element
@@ -78,17 +81,20 @@ export default class Timeline extends Component {
     let $el = this.TimelineElement
 
     const {
-      items,
-      options,
-      customTimes,
-      animate = true,
-    } = this.props
+        items,
+        groups,
+        options,
+        customTimes,
+        animate = true,
+        } = this.props
 
     const timelineItems = new vis.DataSet(items)
+    const groupItems = new vis.DataSet(groups)
     const timelineExists = !!$el
 
     if (timelineExists) {
       $el.setItems(timelineItems)
+      $el.setGroups(groupItems)
 
       let updatedOptions
 
@@ -103,6 +109,7 @@ export default class Timeline extends Component {
 
     } else {
       $el = this.TimelineElement = new vis.Timeline(container, timelineItems, options)
+      $el.setGroups(groupItems)
 
       events.forEach(event => {
         $el.on(event, this.props[`${event}Handler`])
@@ -141,6 +148,7 @@ export default class Timeline extends Component {
 
 Timeline.propTypes = assign({
   items: PropTypes.array,
+  groups: PropTypes.array,
   options: PropTypes.object,
   customTimes: PropTypes.shape({
     datetime: PropTypes.instanceOf(Date),
@@ -154,6 +162,7 @@ Timeline.propTypes = assign({
 
 Timeline.defaultProps = assign({
   items: [],
+  groups: [],
   options: {},
   customTimes: {},
 }, eventDefaultProps)
